@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Build output
+client/dist/
+
+# SQLite database (hosted app builds fresh; keep local DB out of git)
+server/data/
+
+# Env and secrets
+.env
+.env.local
+.env.*.local
+
+# Logs and OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
