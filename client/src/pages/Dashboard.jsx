@@ -1,4 +1,15 @@
 import { useState, useEffect } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from 'recharts';
 import { dashboard, today, brands as brandsApi } from '../api';
 
 export default function Dashboard() {
@@ -44,6 +55,11 @@ export default function Dashboard() {
   }
 
   const selectedBrand = brandId ? brands.find((b) => String(b.id) === String(brandId)) : null;
+  const chartData = [...recent].reverse().map((row) => ({
+    date: row.date,
+    revenue: Number(row.revenue || 0),
+    bottles: Number(row.bottles_sold || 0),
+  }));
 
   return (
     <>
@@ -104,6 +120,55 @@ export default function Dashboard() {
           <div className="label">Brands</div>
         </div>
       </div>
+
+      {chartData.length > 0 && (
+        <>
+          <div className="card">
+            <h3>Revenue by date {selectedBrand ? `— ${selectedBrand.name}` : ''}</h3>
+            <div style={{ width: '100%', height: 280 }}>
+              <ResponsiveContainer>
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2a3142" />
+                  <XAxis dataKey="date" stroke="#8b92a8" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#8b92a8" tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${v}`} />
+                  <Tooltip
+                    contentStyle={{ background: '#1a1f2e', border: '1px solid #2a3142', borderRadius: 8 }}
+                    labelStyle={{ color: '#8b92a8' }}
+                    formatter={(value) => [`₹${Number(value).toFixed(2)}`, 'Revenue']}
+                    labelFormatter={(label) => `Date: ${label}`}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fill="url(#revenueGradient)" strokeWidth={2} name="Revenue" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="card">
+            <h3>Bottles sold by date {selectedBrand ? `— ${selectedBrand.name}` : ''}</h3>
+            <div style={{ width: '100%', height: 280 }}>
+              <ResponsiveContainer>
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2a3142" />
+                  <XAxis dataKey="date" stroke="#8b92a8" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#8b92a8" tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{ background: '#1a1f2e', border: '1px solid #2a3142', borderRadius: 8 }}
+                    labelStyle={{ color: '#8b92a8' }}
+                    formatter={(value) => [value, 'Bottles']}
+                    labelFormatter={(label) => `Date: ${label}`}
+                  />
+                  <Bar dataKey="bottles" fill="#0ea5e9" radius={[4, 4, 0, 0]} name="Bottles sold" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="card">
         <h3>Sales by date {dateFrom ? `(${dateFrom} to ${dateTo})` : '(last 14 days)'} {selectedBrand ? `— ${selectedBrand.name}` : ''}</h3>
