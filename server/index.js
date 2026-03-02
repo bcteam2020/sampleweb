@@ -24,15 +24,29 @@ app.use('/api/dashboard', dashboardRouter);
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 
-// Serve built React app when client/dist exists (e.g. production)
-const clientDist = join(__dirname, '..', 'client', 'dist');
-if (existsSync(clientDist)) {
+// Resolve client/dist: from server/ go up to root then client/dist; also try cwd (Render may run from root)
+function getClientDist() {
+  const fromServer = join(__dirname, '..', 'client', 'dist');
+  if (existsSync(fromServer)) return fromServer;
+  const fromCwd = join(process.cwd(), 'client', 'dist');
+  if (existsSync(fromCwd)) return fromCwd;
+  const fromCwdServer = join(process.cwd(), '..', 'client', 'dist');
+  if (existsSync(fromCwdServer)) return fromCwdServer;
+  return null;
+}
+
+const clientDist = getClientDist();
+if (clientDist) {
   app.use(express.static(clientDist));
   app.get('*', (_, res, next) => {
     res.sendFile(join(clientDist, 'index.html'), (err) => err && next());
   });
+  console.log('Serving frontend from', clientDist);
+} else {
+  console.warn('client/dist not found. Build the client before starting.');
+  app.get('*', (_, res) => res.status(404).send('Frontend not built. Run: npm run build'));
 }
 
 app.listen(PORT, () => {
-  console.log(`Bluewave API running at http://localhost:${PORT}`);
+  console.log('Bluewave API running on port ' + PORT);
 });
