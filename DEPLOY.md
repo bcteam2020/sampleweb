@@ -76,13 +76,33 @@ You can see deploy history and logs under your service → **Logs** / **Events**
 
 ---
 
-## 6. Data persistence (important on free tier)
+## 6. Retain data (stop data from disappearing on reload/redeploy)
 
-- On Render’s **free tier**, the filesystem is **ephemeral**: the SQLite file in `server/data/` is **lost on every deploy or restart**.
-- So the app will run and auto-update, but **data will reset** when the service restarts or you push a new version.
-- For **permanent data** you can later:
-  - Add a [Render Persistent Disk](https://render.com/docs/disks) (paid), or
-  - Switch the app to a free hosted database (e.g. PostgreSQL on [Neon](https://neon.tech) or [Supabase](https://supabase.com)).
+On the **free tier**, Render’s filesystem is **ephemeral**: your SQLite database is **lost on every restart or redeploy**, so data disappears when you reload or push new code.
+
+To **keep your data**, use a **Persistent Disk** and point the app at it:
+
+### Step A: Add a Persistent Disk on Render
+
+1. Open your **Web Service** on the Render dashboard.
+2. Go to **Settings** (or **Disks** in the sidebar).
+3. Click **Add Disk** (or **Connect a persistent disk**).
+4. Choose a **mount path**: use **`/data`** (or any path, e.g. `/data`).
+5. Set the **size** (e.g. 1 GB). Disks are paid; see [Render pricing](https://render.com/pricing).
+6. Save. Render will redeploy and mount the disk at `/data`.
+
+### Step B: Tell the app to use the disk
+
+1. In the same Web Service, go to **Environment** (Environment variables).
+2. Add a variable:
+   - **Key:** `DATA_DIR`
+   - **Value:** `/data` (same as the mount path from Step A; use no trailing slash).
+3. Save. Render will redeploy again.
+
+After this, the database file is stored on the persistent disk. **Reloads and redeploys will no longer delete your data.**
+
+- **Locally:** Do not set `DATA_DIR`; the app will use `server/data/` and data will persist on your machine.
+- **Without a disk:** If you don’t add a disk or env var, the app keeps using the ephemeral filesystem and data will still reset on restart/redeploy.
 
 ---
 

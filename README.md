@@ -51,7 +51,7 @@ Deploy to the cloud with a **free public URL** and **auto-updates on every push*
 3. Get a URL like `https://bluewave-stock.onrender.com`  
 4. Every push to `main` triggers a new deploy  
 
-The repo includes `render.yaml` so Render can use the correct build and start commands. On Render’s free tier, the SQLite database is ephemeral (data resets on deploy/restart); see DEPLOY.md for persistence options.
+The repo includes `render.yaml` so Render can use the correct build and start commands. On Render’s free tier, the SQLite database is ephemeral (data resets on deploy/restart); To **retain data**, add a Render Persistent Disk and set `DATA_DIR=/data`; see [DEPLOY.md § Retain data](./DEPLOY.md#6-retain-data-stop-data-from-disappearing-on-reloadredeploy).
 
 ## Features
 
